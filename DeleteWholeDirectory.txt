@@ -1,0 +1,83 @@
+bool DeleteWholeDirectory(const char * dirname)
+{
+	WIN32_FIND_DATA fileinfo;
+	HANDLE rtn;
+
+	CString tempstr,nowpath;
+
+	nowpath=dirname;
+	if(nowpath.Right(1)!=_T("\\"))	
+		nowpath+=_T("\\");
+
+	if(_access(nowpath,0)) 
+		return true;
+
+	rtn=FindFirstFile(nowpath+_T("*.*"), &fileinfo);
+	while(rtn!=INVALID_HANDLE_VALUE)
+	{
+		tempstr=nowpath+fileinfo.cFileName;
+		if(fileinfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		{
+			if((_tcscmp(fileinfo.cFileName,_T("."))!=0) && (_tcscmp(fileinfo.cFileName,_T(".."))!=0))
+			{
+				if(!DeleteWholeDirectory(tempstr)) 
+					return false;
+
+				//改变文件夹的只读属性
+				if(fileinfo.dwFileAttributes & FILE_ATTRIBUTE_READONLY)
+				{
+					DWORD tempd=fileinfo.dwFileAttributes & (!FILE_ATTRIBUTE_READONLY);
+					SetFileAttributes(tempstr,tempd);
+				}
+				//删除空文件夹:
+				if(!RemoveDirectory(tempstr)) 
+					return false;
+			}
+		}
+		else
+		{
+			//改变文件的只读属性:
+			if(fileinfo.dwFileAttributes & FILE_ATTRIBUTE_READONLY )
+			{
+				DWORD tempd = fileinfo.dwFileAttributes & (! FILE_ATTRIBUTE_READONLY);
+				SetFileAttributes(tempstr,tempd);
+			}
+			if(_tunlink(tempstr))//_unlink函数:删除文件
+				return false;
+		}
+		if(!FindNextFile(rtn,&fileinfo))
+		{
+			FindClose(rtn);
+			break;
+		}
+	}
+	//FindClose(rtn);
+	return true;
+}
+
+//将单字节char*转化为宽字节wchar_t* 
+wchar_t* AnsiToUnicode( const char* szStr )  
+{  
+	int nLen = MultiByteToWideChar( CP_ACP, MB_PRECOMPOSED, szStr, -1, NULL, 0 );  
+	if (nLen == 0)  
+	{  
+		return NULL;  
+	}  
+	wchar_t* pResult = new wchar_t[nLen];  
+	MultiByteToWideChar( CP_ACP, MB_PRECOMPOSED, szStr, -1, pResult, nLen );  
+	return pResult;  
+}  
+
+//将宽字节wchar_t*转化为单字节char*  
+char* UnicodeToAnsi( const wchar_t* szStr )  
+{  
+	int nLen = WideCharToMultiByte( CP_ACP, 0, szStr, -1, NULL, 0, NULL, NULL );  
+	if (nLen == 0)  
+	{  
+		return NULL;  
+	}  
+	char* pResult = new char[nLen];  
+	WideCharToMultiByte( CP_ACP, 0, szStr, -1, pResult, nLen, NULL, NULL );  
+	return pResult;  
+}
+
