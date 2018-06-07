@@ -1,13 +1,13 @@
 
 
-//C++  快速排序
-void run(int *pData,int left,int reght)
+//C++  驴矛脣脵脜脜脨貌
+void run(int *pData,int left,int right)
 {
 	int i,j;
 	int middle,iTemp;
 	i=left;
 	j=right;
-	middle = pData[(left+right)/2]; //求中间值
+	middle = pData[(left+right)/2]; //脟贸脰脨录盲脰碌
 	do
 	{
 		while((pData[i]<middle) && (i<right))
@@ -18,13 +18,13 @@ void run(int *pData,int left,int reght)
 		{
 			iTemp=pData[i];
 			pData[i]=pData[j];
-			pData[j]=iTemp;
-			i++;
-			j--;
+			pData[j]=iTemp;	
 		}
+		i++;
+		j--;
 	}while(i<=j);
 
-	if(left<i)
+	if(left<j)
 		run(pData,left,j);
 	if(right>i)
 		run(pData,i,right);
